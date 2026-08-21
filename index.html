@@ -16,7 +16,6 @@
       background-color: #1a222d;
       color: #e1e6ed;
       min-height: 100vh;
-      /* Отступы по периметру увеличены в 6 раз */
       padding: 60px 48px;
       display: flex;
       justify-content: center;
@@ -29,7 +28,6 @@
       max-width: 900px;
       background-color: #1e2630;
       border-radius: 20px;
-      /* Отступы внутри карточки по периметру */
       padding: 48px 36px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
       border: 1px solid #2a3544;
@@ -37,41 +35,44 @@
 
     .header {
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 42px;
     }
 
+    /* Ещё более крупный заголовок */
     .header h2 {
-      font-size: 32px;
+      font-size: 42px;
+      font-weight: 800;
       color: #ffffff;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .header p {
-      font-size: 16px;
+      font-size: 20px;
       color: #8b9bb4;
     }
 
     .form-group {
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
 
+    /* Названия полей увеличены до уровня заголовка */
     label {
       display: block;
-      font-size: 16px;
-      font-weight: 700;
-      color: #8b9bb4;
+      font-size: 24px;
+      font-weight: 800;
+      color: #a2b4ce;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     input[type="text"],
     textarea {
       width: 100%;
-      font-size: 20px;
-      padding: 22px 18px;
+      font-size: 22px;
+      padding: 24px 20px;
       border-radius: 12px;
       border: 2px solid #2c3847;
       background-color: #141b22;
@@ -95,7 +96,7 @@
       position: relative;
       border: 2px dashed #2c3847;
       border-radius: 12px;
-      padding: 36px 20px;
+      padding: 42px 24px;
       text-align: center;
       background-color: #141b22;
       cursor: pointer;
@@ -111,16 +112,18 @@
       cursor: pointer;
     }
 
+    /* Текст внутри зоны прикрепления файла увеличен */
     .file-label-text {
-      font-size: 18px;
+      font-size: 24px;
+      font-weight: 700;
       color: #8b9bb4;
       word-break: break-all;
     }
 
     .btn-submit {
       width: 100%;
-      padding: 24px;
-      font-size: 20px;
+      padding: 26px;
+      font-size: 24px;
       font-weight: bold;
       background-color: #00a2ff;
       color: #ffffff;
