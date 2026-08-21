@@ -13,10 +13,10 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #1a222d;
+      background-color: #12181f;
       color: #e1e6ed;
       min-height: 100vh;
-      padding: 60px 48px;
+      padding: 16px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -25,56 +25,55 @@
 
     .card {
       width: 100%;
-      max-width: 900px;
+      max-width: 600px;
       background-color: #1e2630;
-      border-radius: 20px;
-      padding: 48px 36px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       border: 1px solid #2a3544;
+      margin-top: 10px;
+      margin-bottom: 20px;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 42px;
+      margin-bottom: 24px;
     }
 
-    /* Ещё более крупный заголовок */
     .header h2 {
-      font-size: 42px;
-      font-weight: 800;
+      font-size: 22px;
       color: #ffffff;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
     }
 
     .header p {
-      font-size: 20px;
+      font-size: 13px;
       color: #8b9bb4;
     }
 
     .form-group {
-      margin-bottom: 36px;
+      margin-bottom: 20px;
     }
 
-    /* Названия полей увеличены до уровня заголовка */
     label {
       display: block;
-      font-size: 24px;
-      font-weight: 800;
-      color: #a2b4ce;
+      font-size: 12px;
+      font-weight: 700;
+      color: #8b9bb4;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 14px;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
     }
 
     input[type="text"],
     textarea {
       width: 100%;
-      font-size: 22px;
-      padding: 24px 20px;
-      border-radius: 12px;
-      border: 2px solid #2c3847;
+      font-size: 16px; /* Оптимально для мобильных, убирает автозум в Safari */
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #2c3847;
       background-color: #141b22;
       color: #ffffff;
       outline: none;
@@ -88,18 +87,24 @@
 
     textarea {
       resize: vertical;
-      min-height: 440px;
-      line-height: 1.5;
+      min-height: 220px; /* Умеренно высокое поле под описание */
+      line-height: 1.4;
     }
 
     .file-drop-zone {
       position: relative;
       border: 2px dashed #2c3847;
-      border-radius: 12px;
-      padding: 42px 24px;
+      border-radius: 8px;
+      padding: 20px;
       text-align: center;
       background-color: #141b22;
       cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .file-drop-zone:hover {
+      border-color: #00a2ff;
+      background-color: #18222c;
     }
 
     .file-drop-zone input[type="file"] {
@@ -112,27 +117,26 @@
       cursor: pointer;
     }
 
-    /* Текст внутри зоны прикрепления файла увеличен */
     .file-label-text {
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 14px;
       color: #8b9bb4;
       word-break: break-all;
     }
 
     .btn-submit {
       width: 100%;
-      padding: 26px;
-      font-size: 24px;
+      padding: 16px;
+      font-size: 16px;
       font-weight: bold;
       background-color: #00a2ff;
       color: #ffffff;
       border: none;
-      border-radius: 14px;
+      border-radius: 10px;
       cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 12px;
+      letter-spacing: 0.5px;
+      transition: background-color 0.2s;
+      margin-top: 10px;
     }
 
     .btn-submit:active {
@@ -178,7 +182,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQhzyKhE4jAIbLOATPQykPKZ-_qPoY8S16759xVIuUD0gLHz6CWMi9KgVyV57X-adq/exec";
+    const SCRIPT_URL = "ВСТАВЬТЕ_СЮДА_URL_ИЗ_APPS_SCRIPT";
 
     // Автозаполнение полей из URL-параметров (из QR-кода)
     window.addEventListener('DOMContentLoaded', () => {
