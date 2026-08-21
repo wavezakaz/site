@@ -13,26 +13,35 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #1e2630;
+      background-color: #1a222d;
       color: #e1e6ed;
       min-height: 100vh;
-      padding: 16px 10px;
+      /* Отступы по периметру увеличены в 6 раз */
+      padding: 60px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       overflow-y: auto;
     }
 
     .card {
       width: 100%;
+      max-width: 900px;
       background-color: #1e2630;
-      padding: 10px 0;
+      border-radius: 20px;
+      /* Отступы внутри карточки по периметру */
+      padding: 48px 36px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid #2a3544;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 36px;
     }
 
     .header h2 {
-      font-size: 30px;
+      font-size: 32px;
       color: #ffffff;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -45,7 +54,7 @@
     }
 
     .form-group {
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
 
     label {
@@ -58,12 +67,11 @@
       margin-bottom: 12px;
     }
 
-    /* Увеличенные поля ввода */
     input[type="text"],
     textarea {
       width: 100%;
-      font-size: 20px; /* Крупный и четкий шрифт ввода */
-      padding: 22px 18px; /* Увеличено внутреннее пространство */
+      font-size: 20px;
+      padding: 22px 18px;
       border-radius: 12px;
       border: 2px solid #2c3847;
       background-color: #141b22;
@@ -77,14 +85,12 @@
       border-color: #00a2ff;
     }
 
-    /* Второе окно — увеличенная высота */
     textarea {
       resize: vertical;
-      min-height: 440px; /* В 2 раза выше предыдущей версии */
+      min-height: 440px;
       line-height: 1.5;
     }
 
-    /* Кастомная крупная зона загрузки файла */
     .file-drop-zone {
       position: relative;
       border: 2px dashed #2c3847;
@@ -111,7 +117,6 @@
       word-break: break-all;
     }
 
-    /* Крупная кнопка отправки */
     .btn-submit {
       width: 100%;
       padding: 24px;
@@ -124,7 +129,7 @@
       cursor: pointer;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .btn-submit:active {
