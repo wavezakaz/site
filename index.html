@@ -44,7 +44,6 @@
       overflow: hidden;
     }
 
-    /* Декоративная акцентная полоса в стиле логотипа */
     .container::before {
       content: '';
       position: absolute;
@@ -107,7 +106,6 @@
       box-shadow: 0 0 8px rgba(0, 168, 255, 0.2);
     }
 
-    /* Кастомная кнопка выбора файла */
     .file-dropzone {
       position: relative;
       border: 2px dashed var(--border-color);
@@ -201,11 +199,11 @@
       </div>
 
       <div class="form-group">
-        <label>Прикрепить файл / Фото</label>
+        <label>Прикрепить файл / Фото (необязательно)</label>
         <div class="file-dropzone">
           <span id="fileLabel" style="color: var(--text-muted); font-size: 14px;">📁 Нажмите или перетащите файл</span>
           <div id="fileName" class="file-name"></div>
-          <input type="file" id="fileInput" required>
+          <input type="file" id="fileInput">
         </div>
       </div>
 
@@ -215,14 +213,13 @@
   </div>
 
   <script>
-    // ⚠️ ВСТАВЬТЕ СЮДА ССЫЛКУ НА ВАШ РАЗВЕРНУТЫЙ GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmwkOXx2Sp1jtSb7h0K_akqGuaCAk3E8vkCYPH0KdLC6myN2WkSxLtPp074qlG7H-W/exec";
+    // ⚠️ ВСТАВЬТЕ СЮДА ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
+    const SCRIPT_URL = "ВСТАВЬТЕ_URL_ВАШЕГО_APPS_SCRIPT";
 
     const fileInput = document.getElementById('fileInput');
     const fileNameDiv = document.getElementById('fileName');
     const fileLabel = document.getElementById('fileLabel');
 
-    // Отображение имени выбранного файла
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
         fileNameDiv.innerText = fileInput.files[0].name;
@@ -233,7 +230,6 @@
       }
     });
 
-    // Автозаполнение из параметров QR-кода при открытии
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('customer')) {
@@ -244,7 +240,6 @@
       }
     });
 
-    // Обработка отправки формы
     document.getElementById('orderForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -257,14 +252,13 @@
       statusMsg.innerText = "";
 
       const file = fileInput.files[0];
-      const reader = new FileReader();
 
-      reader.onload = function(evt) {
+      const sendData = (fileData = null, fileName = null) => {
         const payload = {
           customer: document.getElementById('customer').value,
           title: document.getElementById('title').value,
-          fileName: file.name,
-          fileData: evt.target.result
+          fileName: fileName,
+          fileData: fileData
         };
 
         fetch(SCRIPT_URL, {
@@ -289,7 +283,15 @@
         });
       };
 
-      reader.readAsDataURL(file);
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          sendData(evt.target.result, file.name);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        sendData();
+      }
     });
   </script>
 </body>
