@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пульс Заказов — Подача заявки</title>
+  <style>
+    :root {
+      --bg-color: #121820;
+      --card-bg: #1c2430;
+      --accent-blue: #00a8ff;
+      --accent-hover: #0086cc;
+      --text-main: #f0f4f8;
+      --text-muted: #8a99ad;
+      --border-color: #2a3648;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 480px;
+      padding: 30px 25px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Декоративная акцентная полоса в стиле логотипа */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-blue), transparent);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 8px rgba(0, 168, 255, 0.2);
+    }
+
+    /* Кастомная кнопка выбора файла */
+    .file-dropzone {
+      position: relative;
+      border: 2px dashed var(--border-color);
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .file-dropzone:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .file-dropzone input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-name {
+      font-size: 13px;
+      color: var(--accent-blue);
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--accent-blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      margin-top: 10px;
+    }
+
+    button[type="submit"]:hover {
+      background-color: var(--accent-hover);
+    }
+
+    button[type="submit"]:active {
+      transform: scale(0.99);
+    }
+
+    button[type="submit"]:disabled {
+      background-color: var(--border-color);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
+    .status-msg.success { color: #00e676; display: block; }
+    .status-msg.error { color: #ff5252; display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Пульс Заказов</h1>
+      <p>Форма оперативной подачи заявки</p>
+    </div>
+
+    <form id="orderForm">
+      <div class="form-group">
+        <label for="customer">Заказчик / Отдел</label>
+        <input type="text" id="customer" name="customer" placeholder="Например: СКЛАД" required>
+      </div>
+
+      <div class="form-group">
+        <label for="title">Наименование и описание</label>
+        <textarea id="title" name="title" rows="4" placeholder="Укажите позицию, количество или описание..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Прикрепить файл / Фото</label>
+        <div class="file-dropzone">
+          <span id="fileLabel" style="color: var(--text-muted); font-size: 14px;">📁 Нажмите или перетащите файл</span>
+          <div id="fileName" class="file-name"></div>
+          <input type="file" id="fileInput" required>
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn">Отправить заявку</button>
+      <div id="statusMsg" class="status-msg"></div>
+    </form>
+  </div>
+
+  <script>
+    // ⚠️ ВСТАВЬТЕ СЮДА ССЫЛКУ НА ВАШ РАЗВЕРНУТЫЙ GOOGLE APPS SCRIPT
+    const SCRIPT_URL = "ВСТАВЬТЕ_URL_ВАШЕГО_APPS_SCRIPT";
+
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDiv = document.getElementById('fileName');
+    const fileLabel = document.getElementById('fileLabel');
+
+    // Отображение имени выбранного файла
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        fileNameDiv.innerText = fileInput.files[0].name;
+        fileLabel.innerText = "Файл выбран:";
+      } else {
+        fileNameDiv.innerText = "";
+        fileLabel.innerText = "📁 Нажмите или перетащите файл";
+      }
+    });
+
+    // Автозаполнение из параметров QR-кода при открытии
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('customer')) {
+        document.getElementById('customer').value = urlParams.get('customer');
+      }
+      if (urlParams.has('title')) {
+        document.getElementById('title').value = urlParams.get('title');
+      }
+    });
+
+    // Обработка отправки формы
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const btn = document.getElementById('submitBtn');
+      const statusMsg = document.getElementById('statusMsg');
+      
+      btn.disabled = true;
+      btn.innerText = "Отправка...";
+      statusMsg.className = "status-msg";
+      statusMsg.innerText = "";
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(evt) {
+        const payload = {
+          customer: document.getElementById('customer').value,
+          title: document.getElementById('title').value,
+          fileName: file.name,
+          fileData: evt.target.result
+        };
+
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          statusMsg.className = "status-msg success";
+          statusMsg.innerText = "✓ Заявка успешно отправлена!";
+          document.getElementById('orderForm').reset();
+          fileNameDiv.innerText = "";
+          fileLabel.innerText = "📁 Нажмите или перетащите файл";
+          btn.disabled = false;
+          btn.innerText = "Отправить заявку";
+        })
+        .catch(err => {
+          statusMsg.className = "status-msg error";
+          statusMsg.innerText = "✕ Ошибка при отправке. Попробуйте еще раз.";
+          btn.disabled = false;
+          btn.innerText = "Отправить заявку";
+        });
+      };
+
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
