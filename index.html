@@ -13,58 +13,59 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #1e2630; /* Единый фон без темных полей по бокам */
+      background-color: #1e2630;
       color: #e1e6ed;
       min-height: 100vh;
-      padding: 12px;
+      padding: 16px 10px;
       overflow-y: auto;
     }
 
     .card {
-      width: 100%; /* Растягиваем на весь экран */
+      width: 100%;
       background-color: #1e2630;
-      padding: 10px 4px;
+      padding: 10px 0;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
 
     .header h2 {
-      font-size: 26px; /* Увеличен заголовок */
+      font-size: 30px;
       color: #ffffff;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .header p {
-      font-size: 15px;
+      font-size: 16px;
       color: #8b9bb4;
     }
 
     .form-group {
-      margin-bottom: 22px;
+      margin-bottom: 28px;
     }
 
     label {
       display: block;
-      font-size: 14px; /* Увеличен шрифт подписи */
+      font-size: 16px;
       font-weight: 700;
       color: #8b9bb4;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
     }
 
+    /* Увеличенные поля ввода */
     input[type="text"],
     textarea {
       width: 100%;
-      font-size: 18px; /* Крупный шрифт ввода для удобства */
-      padding: 16px;
-      border-radius: 10px;
-      border: 1px solid #2c3847;
+      font-size: 20px; /* Крупный и четкий шрифт ввода */
+      padding: 22px 18px; /* Увеличено внутреннее пространство */
+      border-radius: 12px;
+      border: 2px solid #2c3847;
       background-color: #141b22;
       color: #ffffff;
       outline: none;
@@ -76,18 +77,19 @@
       border-color: #00a2ff;
     }
 
+    /* Второе окно — увеличенная высота */
     textarea {
       resize: vertical;
-      min-height: 220px; /* Поле стало в 2 раза выше */
-      line-height: 1.4;
+      min-height: 440px; /* В 2 раза выше предыдущей версии */
+      line-height: 1.5;
     }
 
-    /* Кастомная зона загрузки файла */
+    /* Кастомная крупная зона загрузки файла */
     .file-drop-zone {
       position: relative;
       border: 2px dashed #2c3847;
-      border-radius: 10px;
-      padding: 24px 16px;
+      border-radius: 12px;
+      padding: 36px 20px;
       text-align: center;
       background-color: #141b22;
       cursor: pointer;
@@ -104,23 +106,24 @@
     }
 
     .file-label-text {
-      font-size: 16px; /* Увеличен текст загрузки файла */
+      font-size: 18px;
       color: #8b9bb4;
       word-break: break-all;
     }
 
+    /* Крупная кнопка отправки */
     .btn-submit {
       width: 100%;
-      padding: 20px;
-      font-size: 18px; /* Крупная кнопка отправки */
+      padding: 24px;
+      font-size: 20px;
       font-weight: bold;
       background-color: #00a2ff;
       color: #ffffff;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       margin-top: 10px;
     }
 
