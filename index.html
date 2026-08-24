@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Пульс Заказов</title>
+
+  <!-- PWA настройки -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#12181f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Заказы">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
   <style>
     * {
       box-sizing: border-box;
@@ -18,9 +27,63 @@
       min-height: 100vh;
       padding: 16px;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
       overflow-y: auto;
+    }
+
+    /* Стили для PWA-баннера установки */
+    .pwa-banner {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      background-color: #1a2430;
+      border: 1px solid #00a2ff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(0, 162, 255, 0.2);
+    }
+
+    .pwa-banner-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .pwa-text {
+      font-size: 13px;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .pwa-text strong {
+      color: #00a2ff;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .pwa-btn {
+      background-color: #00a2ff;
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pwa-close {
+      background: none;
+      border: none;
+      color: #8b9bb4;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 4px;
     }
 
     .card {
@@ -152,6 +215,18 @@
 </head>
 <body>
 
+  <!-- Баннер PWA установки -->
+  <div id="pwaBanner" class="pwa-banner">
+    <div class="pwa-banner-content">
+      <div class="pwa-text" id="pwaText">
+        <strong>Установить приложение</strong>
+        Добавьте форму на главный экран
+      </div>
+      <button id="pwaBtn" class="pwa-btn">Установить</button>
+      <button onclick="closePwaBanner()" class="pwa-close">✕</button>
+    </div>
+  </div>
+
   <div class="card">
     <div class="header">
       <h2>Пульс Заказов</h2>
@@ -184,7 +259,51 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQhzyKhE4jAIbLOATPQykPKZ-_qPoY8S16759xVIuUD0gLHz6CWMi9KgVyV57X-adq/exec";
 
-    // Автозаполнение полей из URL-параметров (из QR-кода)
+    // --- PWA Логика ---
+    let deferredPrompt;
+    const pwaBanner = document.getElementById('pwaBanner');
+    const pwaBtn = document.getElementById('pwaBtn');
+    const pwaText = document.getElementById('pwaText');
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+    }
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (!isStandalone) {
+      // Android / Chrome
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        pwaBanner.style.display = 'block';
+      });
+
+      // iOS / Safari
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIos) {
+        pwaText.innerHTML = '<strong>Установить приложение</strong>Нажмите «Поделиться» ⎋ и выберите «На экран "Домой"»';
+        pwaBtn.style.display = 'none';
+        pwaBanner.style.display = 'block';
+      }
+    }
+
+    pwaBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaBanner.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    function closePwaBanner() {
+      pwaBanner.style.display = 'none';
+    }
+
+    // --- Автозаполнение полей из URL-параметров (из QR-кода) ---
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       
