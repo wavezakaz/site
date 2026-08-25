@@ -8,10 +8,15 @@
   <!-- PWA настройки -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#12181f">
+  
+  <!-- Иконка приложения (фавикон) -->
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
+  <!-- Настройки для iOS Safari -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Заказы">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+  <meta name="apple-mobile-web-app-title" content="Пульс Заказов">
 
   <style>
     * {
@@ -133,7 +138,7 @@
     input[type="text"],
     textarea {
       width: 100%;
-      font-size: 16px; /* Оптимально для мобильных, убирает автозум в Safari */
+      font-size: 16px;
       padding: 14px;
       border-radius: 8px;
       border: 1px solid #2c3847;
@@ -150,7 +155,7 @@
 
     textarea {
       resize: vertical;
-      min-height: 220px; /* Умеренно высокое поле под описание */
+      min-height: 220px;
       line-height: 1.4;
     }
 
