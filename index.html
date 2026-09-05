@@ -465,15 +465,25 @@
       pwaBanner.style.display = 'none';
     }
 
-    // --- Инициализация авторизации ---
+    // --- Инициализация при загрузке страницы ---
     window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramTitle = urlParams.get('title');
+
       if (currentUser) {
         showApp();
+        if (paramTitle) {
+          document.getElementById('title').value = paramTitle;
+        }
       } else {
         showLogin();
+        if (paramTitle) {
+          sessionStorage.setItem('pending_title', paramTitle);
+        }
       }
     });
 
+    // --- Авторизация ---
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const pin = document.getElementById("pin").value.trim();
@@ -494,6 +504,13 @@
           currentUser = data.customer;
           localStorage.setItem("app_user", currentUser);
           showApp();
+
+          // Если в URL был передано наименование, вставляем его после логина
+          const pendingTitle = sessionStorage.getItem('pending_title');
+          if (pendingTitle) {
+            document.getElementById('title').value = pendingTitle;
+            sessionStorage.removeItem('pending_title');
+          }
         } else {
           showAlert("login-alert", data.message || "Неверный PIN-код", "error");
         }
