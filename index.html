@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Пульс Заказов</title>
   
-  <!-- PWA настройки -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#12181f">
   
-  <!-- Иконка приложения -->
   <link rel="icon" type="image/png" href="./favicon.png?v=3">
   <link rel="apple-touch-icon" href="./favicon.png?v=3">
 
-  <!-- Настройки для iOS Safari -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Пульс Заказов">
@@ -339,7 +336,6 @@
 </head>
 <body>
 
-  <!-- Баннер PWA установки -->
   <div id="pwaBanner" class="pwa-banner">
     <div class="pwa-banner-content">
       <div class="pwa-text" id="pwaText">
@@ -357,7 +353,6 @@
       <p>Панель управления и подачи заявок</p>
     </div>
 
-    <!-- ЭКРАН 1: Авторизация -->
     <div id="login-screen">
       <div id="login-alert" class="alert alert-error"></div>
       <form id="login-form">
@@ -369,7 +364,6 @@
       </form>
     </div>
 
-    <!-- ЭКРАН 2: Главный интерфейс -->
     <div id="app-screen" class="hidden">
       <div class="user-bar">
         <span id="user-display">Пользователь</span>
@@ -383,7 +377,6 @@
 
       <div id="app-alert" class="alert"></div>
 
-      <!-- Вкладка: Подача заявки -->
       <div id="tab-create">
         <form id="orderForm">
           <div class="form-group">
@@ -408,7 +401,6 @@
         </form>
       </div>
 
-      <!-- Вкладка: Список заказов -->
       <div id="tab-orders" class="hidden">
         <div id="orders-list">
           <p style="text-align: center; color: #8b9bb4; font-size: 14px; padding: 20px 0;">Загрузка списка заказов...</p>
@@ -419,7 +411,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKBKtK7eFA--EfxrZ0a7BXfaKqfmRXOKZwR3RPA3ace0xWhxr3MXdflnbiHdKzExLs/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzenEJ_Vl1TAQeSdxtTR9Mp_wBadmqeQ6A6SEejxea323LuTgiMarRxonqmF6LoAheM/exec";
 
     let currentUser = localStorage.getItem("app_user") || null;
 
@@ -572,23 +564,66 @@
       }
     }
 
-    // Вспомогательная функция: Конвертация файла в Base64 частями (безопасно для памяти)
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const bytes = new Uint8Array(reader.result);
-          let binary = '';
-          const chunkSize = 8192;
-          for (let i = 0; i < bytes.length; i += chunkSize) {
-            const chunk = bytes.subarray(i, i + chunkSize);
-            binary += String.fromCharCode.apply(null, chunk);
-          }
-          resolve(window.btoa(binary));
-        };
-        reader.onerror = (error) => reject(error);
+    // --- Прямая загрузка файла в Google Drive API ---
+    async function uploadFileDirectly(file) {
+      const tokenResponse = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getUploadToken' })
+      });
+      const tokenData = await tokenResponse.json();
+
+      if (!tokenData.success || !tokenData.token) {
+        throw new Error("Не удалось получить доступ к хранилищу");
+      }
+
+      const accessToken = tokenData.token;
+      const folderId = tokenData.folderId;
+
+      const metadata = {
+        name: file.name,
+        parents: [folderId]
+      };
+
+      const boundary = '-------314159265358979323846';
+      const delimiter = "\r\n--" + boundary + "\r\n";
+      const close_delim = "\r\n--" + boundary + "--";
+
+      const reader = new FileReader();
+      const fileData = await new Promise((resolve, reject) => {
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = err => reject(err);
         reader.readAsArrayBuffer(file);
       });
+
+      const contentType = file.type || 'application/octet-stream';
+
+      const metadataBlob = new Blob([
+        delimiter +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' + contentType + '\r\n\r\n'
+      ], { type: 'text/plain' });
+
+      const closeBlob = new Blob([close_delim], { type: 'text/plain' });
+      const fullBody = new Blob([metadataBlob, fileData, closeBlob]);
+
+      const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+        },
+        body: fullBody
+      });
+
+      const resFile = await uploadResponse.json();
+      if (resFile.id) {
+        return 'https://drive.google.com/file/d/' + resFile.id + '/view';
+      } else {
+        throw new Error(resFile.error ? resFile.error.message : "Ошибка загрузки файла");
+      }
     }
 
     // --- Отправка формы заявки ---
@@ -603,31 +638,16 @@
       if (!title) return;
 
       btn.disabled = true;
-      btn.innerText = "ОТПРАВКА...";
       hideAlert("app-alert");
 
-      const payload = {
-        action: "createOrder",
-        customer: currentUser,
-        title: title
-      };
+      let fileUrl = "";
 
       if (file) {
-        // Лимит Apps Script для передачи через JSON (с учётом overhead Base64) ~15–20 МБ
-        if (file.size > 15 * 1024 * 1024) {
-          showAlert("app-alert", "Размер файла не должен превышать 15 МБ", "error");
-          btn.disabled = false;
-          btn.innerText = "ОТПРАВИТЬ ЗАЯВКУ";
-          return;
-        }
-
+        btn.innerText = "ЗАГРУЗКА ФАЙЛА...";
         try {
-          btn.innerText = "ПОДГОТОВКА ФАЙЛА...";
-          payload.fileData = await fileToBase64(file);
-          payload.fileName = file.name;
-          payload.mimeType = file.type || "application/octet-stream";
+          fileUrl = await uploadFileDirectly(file);
         } catch (err) {
-          showAlert("app-alert", "Ошибка чтения файла: " + err.message, "error");
+          showAlert("app-alert", "Ошибка загрузки файла: " + err.message, "error");
           btn.disabled = false;
           btn.innerText = "ОТПРАВИТЬ ЗАЯВКУ";
           return;
@@ -636,12 +656,17 @@
 
       btn.innerText = "СОХРАНЕНИЕ ЗАЯВКИ...";
 
+      const payload = {
+        action: "createOrder",
+        customer: currentUser,
+        title: title,
+        fileUrl: fileUrl
+      };
+
       try {
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
 
@@ -702,27 +727,4 @@
           listContainer.innerHTML = '<p style="text-align: center; color: #8b9bb4; font-size: 14px; padding: 20px 0;">У вас пока нет отправленных заявок</p>';
         }
       } catch (err) {
-        listContainer.innerHTML = '<p style="text-align: center; color: #f87171; font-size: 14px; padding: 20px 0;">Ошибка загрузки списка заказов</p>';
-      }
-    }
-
-    // Вспомогательные функции
-    function showAlert(elementId, text, type) {
-      const el = document.getElementById(elementId);
-      el.className = `alert alert-${type === 'error' ? 'error' : 'success'}`;
-      el.innerText = text;
-      el.style.display = "block";
-    }
-
-    function hideAlert(elementId) {
-      document.getElementById(elementId).style.display = "none";
-    }
-
-    function escapeHtml(text) {
-      return text.replace(/[&<>"']/g, function(m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-      });
-    }
-  </script>
-</body>
-</html>
+        listContainer.innerHTML = '<p style="text-align: center;
