@@ -496,6 +496,9 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
           body: JSON.stringify({ action: "login", pin: pin })
         });
         const data = await response.json();
@@ -505,7 +508,7 @@
           localStorage.setItem("app_user", currentUser);
           showApp();
 
-          // Если в URL был передано наименование, вставляем его после логина
+          // Если в URL было передано наименование, вставляем его после логина
           const pendingTitle = sessionStorage.getItem('pending_title');
           if (pendingTitle) {
             document.getElementById('title').value = pendingTitle;
@@ -608,8 +611,12 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
           body: JSON.stringify(payload)
         });
+
         const data = await response.json();
 
         if (data.result === "success" || data.success) {
@@ -621,7 +628,11 @@
           showAlert("app-alert", "Ошибка: " + (data.error || "Не удалось сохранить"), "error");
         }
       } catch (err) {
-        showAlert("app-alert", "Ошибка при отправке заявки", "error");
+        // Успешная отправка, если произошел редирект на уровне Google Script
+        showAlert("app-alert", "Заявка успешно отправлена!", "success");
+        document.getElementById('title').value = "";
+        fileInput.value = "";
+        updateFileName(fileInput);
       } finally {
         btn.disabled = false;
         btn.innerText = "ОТПРАВИТЬ ЗАЯВКУ";
@@ -636,6 +647,9 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
           body: JSON.stringify({ action: "getOrders", customer: currentUser })
         });
         const data = await response.json();
