@@ -99,6 +99,7 @@
     .badge-new { background-color: #1e3a5f; color: #60a5fa; border: 1px solid #2563eb; }
     .badge-work { background-color: #4a3b00; color: #fbbf24; border: 1px solid #d97706; }
     .badge-done { background-color: #064e3b; color: #34d399; border: 1px solid #059669; }
+    .badge-cancel { background-color: #3d1a1d; color: #fca5a5; border: 1px solid #f87171; }
     .alert { padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
     .alert-error { background-color: #3d1a1d; border: 1px solid #f87171; color: #fca5a5; }
     .alert-success { background-color: #133e2b; border: 1px solid #34d399; color: #a7f3d0; }
@@ -124,7 +125,6 @@
       <p>Панель управления и подачи заявок</p>
     </div>
 
-    <!-- ЭКРАН 1: Авторизация -->
     <div id="login-screen">
       <div id="login-alert" class="alert alert-error"></div>
       <form id="login-form">
@@ -136,7 +136,6 @@
       </form>
     </div>
 
-    <!-- ЭКРАН 2: Главный интерфейс -->
     <div id="app-screen" class="hidden">
       <div class="user-bar">
         <span id="user-display">Пользователь</span>
@@ -184,7 +183,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt2SCXujiqcSvOqJ6bh9U7DWUWGjAae3wSXDVDW1Np401wNPiWtsXiYlE8JCh5tZeO/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1qbhwzTLvfUMqch77a-W4o_sQ8h-ss0uAdVh09D_1eu2fqqaMjvL1pRehJGtbQPH5/exec";
 
     let currentUser = localStorage.getItem("app_user") || null;
 
@@ -238,7 +237,6 @@
       }
     });
 
-    // --- Авторизация по PIN ---
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const pin = document.getElementById("pin").value.trim();
@@ -323,7 +321,6 @@
       }
     }
 
-    // Чтение файла без подвисания браузера
     function readFileAsBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -336,7 +333,6 @@
       });
     }
 
-    // --- Отправка формы заявки ---
     document.getElementById('orderForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -400,7 +396,6 @@
       }
     });
 
-    // --- Загрузка списка заказов ---
     async function loadOrders() {
       const listContainer = document.getElementById("orders-list");
       listContainer.innerHTML = '<p style="text-align: center; color: #8b9bb4; font-size: 14px; padding: 20px 0;">Загрузка списка заказов...</p>';
@@ -415,16 +410,28 @@
 
         if (data.success && data.orders.length > 0) {
           listContainer.innerHTML = data.orders.map(order => {
-            let badgeClass = "badge-new";
-            const st = (order.status || "").toLowerCase();
-            if (st.includes("раб")) badgeClass = "badge-work";
-            if (st.includes("гот") || st.includes("завр") || st.includes("вып")) badgeClass = "badge-done";
+            // Если статус пустой, подставляем "В работу"
+            let statusText = (order.status || "").trim();
+            if (!statusText) {
+              statusText = "В работу";
+            }
+
+            let badgeClass = "badge-work";
+            const st = statusText.toLowerCase();
+
+            if (st.includes("отмен")) {
+              badgeClass = "badge-cancel";
+            } else if (st.includes("гот") || st.includes("завр") || st.includes("вып")) {
+              badgeClass = "badge-done";
+            } else if (st.includes("нов")) {
+              badgeClass = "badge-new";
+            }
 
             return `
               <div class="order-card">
                 <div class="order-header">
                   <span>📅 ${order.date}</span>
-                  <span class="badge ${badgeClass}">${order.status}</span>
+                  <span class="badge ${badgeClass}">${escapeHtml(statusText)}</span>
                 </div>
                 <div class="order-title">${escapeHtml(order.title)}</div>
               </div>
