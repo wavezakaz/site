@@ -419,7 +419,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMon_9ypzFG0geiBgGaBvUh2EiDWX-usR4OApE-8OW2ENVslMP3VoYUw3Ky9fGM-qv/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOEbUCA23OG9CUYmvzXUBpErflSOGe02ytFRr3CV5rqJwy6hCtV-kzYBcySW3Bbmj/exec";
 
     let currentUser = localStorage.getItem("app_user") || null;
 
@@ -537,7 +537,6 @@
     }
 
     function showApp() {
-      document.getElementById("login-screen").classList.hidden = false;
       document.getElementById("login-screen").classList.add("hidden");
       document.getElementById("app-screen").classList.remove("hidden");
       document.getElementById("user-display").innerText = "👤 " + currentUser;
@@ -573,24 +572,7 @@
       }
     }
 
-    // Вспомогательная функция: Конвертация файла в чистый Base64 через ArrayBuffer
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const bytes = new Uint8Array(reader.result);
-          let binary = '';
-          for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-          }
-          resolve(window.btoa(binary));
-        };
-        reader.onerror = (error) => reject(error);
-        reader.readAsArrayBuffer(file);
-      });
-    }
-
-    // --- Отправка формы заявки ---
+    // --- Отправка формы заявки с прямой загрузкой файла в Google Drive ---
     document.getElementById('orderForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -605,41 +587,70 @@
       btn.innerText = "ОТПРАВКА...";
       hideAlert("app-alert");
 
-      const payload = {
-        action: "createOrder",
-        customer: currentUser,
-        title: title
-      };
+      let uploadedFileId = "";
 
+      // 1. Быстрая прямая загрузка бинарника файла в Google Drive
       if (file) {
-        if (file.size > 10 * 1024 * 1024) {
-          showAlert("app-alert", "Размер файла не должен превышать 10 МБ", "error");
+        if (file.size > 25 * 1024 * 1024) {
+          showAlert("app-alert", "Размер файла не должен превышать 25 МБ", "error");
           btn.disabled = false;
           btn.innerText = "ОТПРАВИТЬ ЗАЯВКУ";
           return;
         }
 
         try {
-          btn.innerText = "ЧТЕНИЕ ФАЙЛА...";
-          payload.fileData = await fileToBase64(file);
-          payload.fileName = file.name;
-          payload.mimeType = file.type || "application/octet-stream";
+          btn.innerText = "ПОДГОТОВКА ССЫЛКИ...";
+          
+          // Получаем ссылку прямой загрузки от Google
+          const resSession = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: "getUploadUrl",
+              fileName: file.name,
+              mimeType: file.type || "application/octet-stream"
+            })
+          });
+          const sessionData = await resSession.json();
+
+          if (!sessionData.success || !sessionData.uploadUrl) {
+            throw new Error(sessionData.error || "Ошибка получения URL загрузки");
+          }
+
+          btn.innerText = "ЗАГРУЗКА ФАЙЛА...";
+
+          // Прямая загрузка файла чисто бинарным потоком
+          const uploadRes = await fetch(sessionData.uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type || "application/octet-stream" },
+            body: file
+          });
+
+          const driveFile = await uploadRes.json();
+          uploadedFileId = driveFile.id;
+
         } catch (err) {
-          showAlert("app-alert", "Ошибка чтения файла", "error");
+          showAlert("app-alert", "Ошибка загрузки файла: " + err.message, "error");
           btn.disabled = false;
           btn.innerText = "ОТПРАВИТЬ ЗАЯВКУ";
           return;
         }
       }
 
-      btn.innerText = "СОХРАНЕНИЕ...";
+      // 2. Отправка текстовых данных заявки
+      btn.innerText = "СОХРАНЕНИЕ ЗАЯВКИ...";
+
+      const payload = {
+        action: "createOrder",
+        customer: currentUser,
+        title: title,
+        fileId: uploadedFileId
+      };
 
       try {
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
 
