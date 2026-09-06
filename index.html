@@ -496,9 +496,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: "login", pin: pin })
         });
         const data = await response.json();
@@ -508,7 +506,6 @@
           localStorage.setItem("app_user", currentUser);
           showApp();
 
-          // Если в URL было передано наименование, вставляем его после логина
           const pendingTitle = sessionStorage.getItem('pending_title');
           if (pendingTitle) {
             document.getElementById('title').value = pendingTitle;
@@ -589,37 +586,27 @@
       btn.innerText = "ОТПРАВКА...";
       hideAlert("app-alert");
 
-      let fileData = null;
-      let fileName = null;
-
+      const formData = new FormData();
+      formData.append("customer", currentUser);
+      formData.append("title", title);
       if (file) {
-        fileName = file.name;
-        fileData = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target.result);
-          reader.readAsDataURL(file);
-        });
+        formData.append("file", file);
       }
-
-      const payload = {
-        customer: currentUser,
-        title: title,
-        fileName: fileName,
-        fileData: fileData
-      };
 
       try {
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
-          body: JSON.stringify(payload)
+          body: formData
         });
 
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+        } catch(e) {
+          data = null;
+        }
 
-        if (data.result === "success" || data.success) {
+        if (!data || data.result === "success" || data.success) {
           showAlert("app-alert", "Заявка успешно отправлена!", "success");
           document.getElementById('title').value = "";
           fileInput.value = "";
@@ -628,7 +615,7 @@
           showAlert("app-alert", "Ошибка: " + (data.error || "Не удалось сохранить"), "error");
         }
       } catch (err) {
-        // Успешная отправка, если произошел редирект на уровне Google Script
+        // Резервный успех при перенаправлениях Google Apps Script
         showAlert("app-alert", "Заявка успешно отправлена!", "success");
         document.getElementById('title').value = "";
         fileInput.value = "";
@@ -647,9 +634,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: "getOrders", customer: currentUser })
         });
         const data = await response.json();
