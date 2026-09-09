@@ -410,10 +410,10 @@
 
         if (data.success && data.orders.length > 0) {
           listContainer.innerHTML = data.orders.map(order => {
-            // Если статус пустой, подставляем "В работу"
+            // Если статус пустой, подставляем "В работе"
             let statusText = (order.status || "").trim();
             if (!statusText) {
-              statusText = "В работу";
+              statusText = "В работе";
             }
 
             let badgeClass = "badge-work";
